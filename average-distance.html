@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Map with Canvas Overlay</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+
+        .map-container {
+            width: 80%;
+            height: 60vh;
+        }
+        /* Style for the map container */
+        #map {
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
+        /* Style for the canvas overlay */
+
+    </style>
+</head>
+<body>
+    <div class="map-container">
+        <!-- The div for the map -->
+        <div id="map"></div>
+        <button onclick="removeCircles()">Remove Circles</button>
+    </div>
+
+
+    <!-- Leaflet.js for the map functionality -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        // Initialize the Leaflet map and set the initial view to latitude 0, longitude 0 (equator), zoom level 2
+        var map = L.map('map').setView([0, 0], 2);
+
+        // Load OpenStreetMap tiles and display them on the map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        var circles = [];
+
+          // click circle:
+        var clickCircle;
+
+        function onMapClick(e) {
+            if (clickCircle != undefined) {
+                map.removeLayer(clickCircle);
+            };
+            clickCircle = L.circle(e.latlng, 1609 * 3, {
+                color: '#f07300',
+                fillOpacity: 0.5,
+                opacity: 1
+            }).addTo(map);
+            
+        }
+
+
+
+        map.on('click', onMapClick);
+
+
+
+    </script>
+
+</body>
+</html>
