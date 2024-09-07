@@ -60,6 +60,24 @@
             getCountryFromCoords(e.latlng.lat, e.latlng.lng)
                 .then(country => console.log(country))
                 .catch(err => console.error(err));
+            // Parse the JSON file and get the density for the clicked country
+            fetch('country-by-population-density.json')
+                .then(response => response.json())
+                .then(data => {
+                    getCountryFromCoords(e.latlng.lat, e.latlng.lng)
+                        .then(country => {
+                            const countryData = data.find(item => item.country === country);
+                            if (countryData) {
+                                console.log(`Population density of ${country}: ${countryData.density} people per km²`);
+                                // You can use this density value for further calculations or display
+                            } else {
+                                console.log(`No density data found for ${country}`);
+                            }
+                        })
+                        .catch(err => console.error(err));
+                })
+                .catch(error => console.error('Error loading JSON:', error));
+            
             
         }
 
