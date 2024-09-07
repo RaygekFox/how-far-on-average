@@ -56,12 +56,43 @@
                 fillOpacity: 0.5,
                 opacity: 1
             }).addTo(map);
+            console.log(e.latlng.lat, e.latlng.lng)
+            getCountryFromCoords(e.latlng.lat, e.latlng.lng)
+                .then(country => console.log(country))
+                .catch(err => console.error(err));
             
         }
 
 
 
         map.on('click', onMapClick);
+
+
+        
+        async function getCountryFromCoords(lat, lng) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data && data.address && data.address.country) {
+            return data.address.country;
+            } else {
+            throw new Error("No country found for the given coordinates");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+        }
+        // // Usage:
+        // getCountryFromCoords(48.8588443, 2.2943506) // Example: coordinates of Paris, France
+        // .then(country => console.log(country)) // Outputs: France
+        // .catch(err => console.error(err));
+        
+        
+
+
 
 
 
