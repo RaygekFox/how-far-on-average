@@ -44,76 +44,64 @@
 
         var circles = [];
 
-          // click circle:
+        // click circle:
         var clickCircle;
 
         function onMapClick(e) {
-            if (clickCircle != undefined) {
-                map.removeLayer(clickCircle);
-            };
-            clickCircle = L.circle(e.latlng, 1609 * 3, {
-                color: '#f07300',
-                fillOpacity: 0.5,
-                opacity: 1
-            }).addTo(map);
-            console.log(e.latlng.lat, e.latlng.lng)
+            console.log(e.latlng.lat, e.latlng.lng);
+
             getCountryFromCoords(e.latlng.lat, e.latlng.lng)
-                .then(country => console.log(country))
-                .catch(err => console.error(err));
-            // Parse the JSON file and get the density for the clicked country
-            fetch('country-by-population-density.json')
-                .then(response => response.json())
-                .then(data => {
-                    getCountryFromCoords(e.latlng.lat, e.latlng.lng)
-                        .then(country => {
+                .then(country => {
+                    console.log(country);
+                    return fetch('country-by-population-density.json')
+                        .then(response => response.json())
+                        .then(data => {
                             const countryData = data.find(item => item.country === country);
                             if (countryData) {
-                                console.log(`Population density of ${country}: ${countryData.density} people per km²`);
-                                // You can use this density value for further calculations or display
+                                const popDensity = countryData.density;
+                                console.log(`Population density of ${country}: ${popDensity} people per km²`);
+                                
+                                const radius = Math.sqrt(1 / (popDensity * Math.PI)) * 1000;
+                                
+                                if (clickCircle) {
+                                    map.removeLayer(clickCircle);
+                                }
+                                clickCircle = L.circle(e.latlng, radius, {
+                                    color: '#f07300',
+                                    fillOpacity: 0.5,
+                                    opacity: 1
+                                }).addTo(map);
                             } else {
                                 console.log(`No density data found for ${country}`);
                             }
-                        })
-                        .catch(err => console.error(err));
+                        });
                 })
-                .catch(error => console.error('Error loading JSON:', error));
-            
-            
+                .catch(err => console.error('Error:', err));
         }
-
-
 
         map.on('click', onMapClick);
 
-
-        
         async function getCountryFromCoords(lat, lng) {
-        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
 
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
 
-            if (data && data.address && data.address.country) {
-            return data.address.country;
-            } else {
-            throw new Error("No country found for the given coordinates");
+                if (data && data.address && data.address.country) {
+                    return data.address.country;
+                } else {
+                    throw new Error("No country found for the given coordinates");
+                }
+            } catch (error) {
+                console.error("Error:", error);
             }
-        } catch (error) {
-            console.error("Error:", error);
-        }
         }
         // // Usage:
         // getCountryFromCoords(48.8588443, 2.2943506) // Example: coordinates of Paris, France
         // .then(country => console.log(country)) // Outputs: France
         // .catch(err => console.error(err));
         
-        
-
-
-
-
-
     </script>
 
 </body>
