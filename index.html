@@ -76,9 +76,16 @@
         var clickCircle;
 
         function onMapClick(e) {
-            console.log(e.latlng.lat, e.latlng.lng);
+            // Ensure we have the correct coordinates for both mouse and touch events
+            var latlng = e.latlng;
+            if (e.type === 'touchend') {
+                // For touch events, we need to get the position differently
+                latlng = map.mouseEventToLatLng(e.originalEvent.changedTouches[0]);
+            }
 
-            getCountryFromCoords(e.latlng.lat, e.latlng.lng)
+            console.log(latlng.lat, latlng.lng);
+
+            getCountryFromCoords(latlng.lat, latlng.lng)
                 .then(country => {
                     console.log(country);
                     return fetch('country-by-population-density.json')
@@ -107,7 +114,7 @@
                 .catch(err => console.error('Error:', err));
         }
 
-        map.on('click', onMapClick);
+        map.on('click touchend', onMapClick);
 
         async function getCountryFromCoords(lat, lng) {
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
