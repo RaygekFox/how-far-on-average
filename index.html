@@ -41,13 +41,23 @@
             margin-bottom: 10px;
             font-family: "Roboto Mono", monospace;
         }
-        
+
+        select#entitySelect {
+            margin-bottom: 10px;
+            padding: 5px;
+            font-family: 'Roboto Mono', monospace;
+        }
 
     </style>
 </head>
 <body>
     <div class="container">
         <h1>How Far On Average?</h1>
+        <select id="entitySelect">
+            <option value="people">people</option>
+            <option value="dogs">dogs</option>
+            <option value="trees">trees</option>
+        </select>
         <p>Click on the map.</p>
         <div class="map-container">
             <!-- The div for the map -->
@@ -61,6 +71,9 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
     <script>
+        // Add this at the beginning of your script
+        let selectedEntity = 'people'; // Default value
+
         // Initialize the Leaflet map and set the initial view to latitude 0, longitude 0 (equator), zoom level 2
         var map = L.map('map').setView([0, 0], 2);
 
@@ -84,6 +97,7 @@
             }
 
             console.log(latlng.lat, latlng.lng);
+        
 
             getCountryFromCoords(latlng.lat, latlng.lng)
                 .then(country => {
@@ -136,6 +150,14 @@
         // getCountryFromCoords(48.8588443, 2.2943506) // Example: coordinates of Paris, France
         // .then(country => console.log(country)) // Outputs: France
         // .catch(err => console.error(err));
+
+        
+        document.getElementById('entitySelect').addEventListener('change', function(e) {
+            selectedEntity = e.target.value;
+            console.log('Selected entity:', selectedEntity);
+        });
+
+
         
     </script>
 
