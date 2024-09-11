@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
 
+        body {
+            padding: 20px;
+        }
+
         .map-container {
             width: 80%;
             height: 60vh;
@@ -46,6 +50,11 @@
             margin-bottom: 10px;
             padding: 5px;
             font-family: 'Roboto Mono', monospace;
+            font-size: 1em;
+            background-color: #a9eaff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            border: 1px solid #000;
+            border-radius: 5px;
         }
 
     </style>
@@ -54,16 +63,16 @@
     <div class="container">
         <h1>How Far On Average?</h1>
         <select id="entitySelect">
-            <option value="people">people</option>
-            <option value="dogs">dogs</option>
-            <option value="trees">trees</option>
+            <option value="people">people &#x1F6B6;</option>
+            <option value="dogs">dogs &#x1F436;</option>
+            <option value="trees">trees &#x1F333;</option>
         </select>
         <p>Click on the map.</p>
         <div class="map-container">
             <!-- The div for the map -->
             <div id="map"></div>
         </div>
-        <p>The red circle is how far on average you are from another person if you travel around this country.</p>
+        <p id="BottomText"></p>
     </div>
 
 
@@ -71,11 +80,11 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
     <script>
-        // Add this at the beginning of your script
-        let selectedEntity = 'people'; // Default value
 
-        // Initialize the Leaflet map and set the initial view to latitude 0, longitude 0 (equator), zoom level 2
-        var map = L.map('map').setView([0, 0], 2);
+        let selectedEntity = 'people'; // Default value
+        let map = L.map('map').setView([0, 0], 2);
+        let circles = [];
+        let clickCircle;
 
         // Load OpenStreetMap tiles and display them on the map
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -83,22 +92,28 @@
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        var circles = [];
 
-        // click circle:
-        var clickCircle;
 
         function onMapClick(e) {
-            // Ensure we have the correct coordinates for both mouse and touch events
-            var latlng = e.latlng;
+            let latlng = e.latlng;
             if (e.type === 'touchend') {
-                // For touch events, we need to get the position differently
                 latlng = map.mouseEventToLatLng(e.originalEvent.changedTouches[0]);
             }
 
             console.log(latlng.lat, latlng.lng);
-        
+            
+            if (selectedEntity === 'people') {
+                drawPeopleCircle(latlng);
+            }
+            else if (selectedEntity === 'trees') {
+                drawTreeCircle(latlng);
+            }
+            else if (selectedEntity === 'dogs') {
+                drawDogCircle(latlng);
+            }
+        }
 
+        function drawPeopleCircle(latlng) {
             getCountryFromCoords(latlng.lat, latlng.lng)
                 .then(country => {
                     console.log(country);
@@ -115,7 +130,7 @@
                                 if (clickCircle) {
                                     map.removeLayer(clickCircle);
                                 }
-                                clickCircle = L.circle(e.latlng, radius, {
+                                clickCircle = L.circle(latlng, radius, {
                                     color: '#f07300',
                                     fillOpacity: 0.5,
                                     opacity: 1
@@ -126,7 +141,37 @@
                         });
                 })
                 .catch(err => console.error('Error:', err));
+            document.getElementById('BottomText').textContent = `If everyone in this country got an equal share of land, this is how much they would get. In other words, if people are uniformly distributed, this is how far you would be from another person.`;
         }
+
+        function drawTreeCircle(latlng) {
+            if (clickCircle) {
+                map.removeLayer(clickCircle);
+            }
+            clickCircle = L.circle(latlng, 4, {
+                color: '#f07300',
+                fillOpacity: 0.5,
+                opacity: 1
+            }).addTo(map);
+            document.getElementById('BottomText').textContent = `If all the trees would be uniformly distributed, this is how far on average you would be from one. If there are more trees in a particular circle like that - we can confidently call it a "forest".`;
+        }
+
+        function drawDogCircle(latlng) {
+            if (clickCircle) {
+                map.removeLayer(clickCircle);
+            }
+            clickCircle = L.circle(latlng, 230, {
+                color: '#f07300',
+                fillOpacity: 0.5,
+                opacity: 1
+            }).addTo(map);
+            document.getElementById('BottomText').textContent = `If all the dogs would be uniformly distributed, this is how far on average you would be from one. If you have one closer - you are lucky! Go pet it!`;
+        }
+
+
+
+
+
 
         map.on('click touchend', onMapClick);
 
